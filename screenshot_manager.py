@@ -16,7 +16,7 @@ class wanton:
         self.approach = "bottomup"  # topdown or bottomup
         self.driver = webdriver.Chrome(executable_path='drivers/chromedriver/chromedriver')
 
-    def master(self, url):
+    def master(self, url, idImage):
         
         # setup folders and driver
         padding = self.setUp(url)
@@ -28,7 +28,7 @@ class wanton:
         yOffset, yPos, yDelta, xDelta, fullWidth, fullHeight, windowHeight = self.getDimensions(padding)
 
         # scroll down the page to initiate any animations
-        self.scrollfullpage(fullHeight)
+        #self.scrollfullpage(fullHeight)
 
         # find screenshot positions, adjusted widths and heights accordingly given the padding
         arrangements = self.getPositions(yOffset, yPos, yDelta, xDelta, fullWidth, fullHeight)
@@ -37,7 +37,7 @@ class wanton:
         arrangements = self.arrangePositions(arrangements)
 
         # take a screenshot at the provided positions
-        images = self.processArrangements(arrangements, url)
+        images = self.processArrangements(arrangements, url, idImage)
         cropped_images = []
         total_height = 0
         total_width = 0
@@ -61,7 +61,7 @@ class wanton:
             total_width = total_width if total_width > im_width else im_width
 
         # stitch the screenshots together into one image
-        stitched_filename = self.stitchScreenshots(cropped_images, total_width, total_height)
+        #stitched_filename = self.stitchScreenshots(cropped_images, total_width, total_height)
     
         self.clear_tmp()
 
@@ -170,7 +170,7 @@ class wanton:
 
         return arrangements
 
-    def processArrangements(self, arrangements, url):
+    def processArrangements(self, arrangements, url, idImage):
 
         images = []
 
@@ -196,6 +196,7 @@ class wanton:
             url_tiny = url[28:34]
             url_tiny = re.sub('\/+', "", url_tiny)  # substitute / character with nothing
             filename = (("screenshots/tmp/%s_screenshot_%s.png") % (url_tiny, i))
+            filename = "screenshots/full/"+ idImage + ".png"
             images.append(filename)
             self.driver.get_screenshot_as_file(filename)
 
@@ -225,7 +226,7 @@ class wanton:
         # open screenshot and crop it
         base_image = Image.open(original_filename)
         cropped_image = base_image.crop(bounding_box)
-        base_image = base_image.resize(cropped_image.size)
+        #base_image = base_image.resize(cropped_image.size)
         base_image.paste(cropped_image, (0, 0))
 
         # save the cropped screenshot
@@ -299,11 +300,12 @@ if __name__ == '__main__':
     try:
         if len(sys.argv)>1:
             url = sys.argv[1]
+            idImage = sys.argv[2]
         else:
             url = test_url
         w = wanton()
         driver = w.driver
-        w.master(url)
+        w.master(url, idImage)
     except Exception as exc:
         print(exc)
         traceback.print_exc(file=sys.stdout)
